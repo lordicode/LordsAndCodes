@@ -172,3 +172,56 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Object files
+*.o
+*.obj
+
+# Static libraries
+*.lib
+*.a
+
+# Shared libraries / DLLs
+*.so
+*.dll
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Build directories
+build/
+bin/
+lib/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.vcxproj.*
+*.vcxproj.user
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Auto-generated files
+*.vcxproj.filters
+*.vcxproj.*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+ipch/
+
+# Build results
+[Dd]ebug*/
+[Rr]elease*/
+x64/
+build/
+
+# Visual Studio Code workspace
+*.code-workspace
