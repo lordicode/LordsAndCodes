@@ -10,7 +10,7 @@ set(BUILD_SHARED_LIBS TRUE CACHE BOOL "Build shared libraries")
 remove_definitions(-DSFML_STATIC)
 
 set(SFML_DIR "D:/libs/SFML-3.0.0/lib/cmake/SFML")
-find_package(SFML REQUIRED COMPONENTS Graphics Window System)
+find_package(SFML REQUIRED COMPONENTS Graphics Window System Audio)
 
 
 file(GLOB_RECURSE GAME_SRC CONFIGURE_DEPENDS "src/*.cpp")
@@ -19,7 +19,10 @@ add_executable(${PROJECT_NAME} ${GAME_SRC})
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-        SFML::Graphics      
+        SFML::Graphics
+        SFML::Window
+        SFML::System
+        SFML::Audio
 )
 
 if (WIN32 AND NOT SFML_STATIC_LIBRARIES)
