@@ -1,38 +1,38 @@
 #include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
-#include <iostream>
-#include <map>
-#include <queue>
-#include <vector>
+#include <memory>
+#include "State.h"
+#include "TitleState.h"
+#include "MapViewState.h"
 
 int main()
 {
-    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "Lord & Codes");
+    sf::RenderWindow window(sf::VideoMode({1200, 700}), "Lord & Codes");
     window.setFramerateLimit(144);
 
-    //const sf::Texture texture("src\\Assets\\MapTiles\\2.png");
-    //sf::Sprite house(texture);
+    // Start on the Title screen.
+    std::unique_ptr<State> currentState = std::make_unique<TitleState>(window);
 
-    //house.setPosition({50.f, 30.f});
-    //sf::Music music("src\\Assets\\Music\\tense.wav"); 
-    //music.play();
-
+    sf::Clock clock;
     while (window.isOpen())
-    {    
+    {
+        sf::Time dt = clock.restart();
 
-        while (const std::optional event = window.pollEvent())
+        while (auto maybeEvent = window.pollEvent())
         {
-            if (event->is<sf::Event::Closed>())
-            {
-                window.close();
-            }
+            const sf::Event& event = *maybeEvent;
+            currentState->handleEvent(event);
         }
 
-        window.clear();
-        //window.draw(house);
-        window.display();       
+        currentState->update(dt);
+        currentState->draw();
 
+        // If we’re still in TitleState and “Start Game” was chosen, swap to MapViewState:
+        if (auto titlePtr = dynamic_cast<TitleState*>(currentState.get())) {
+            if (titlePtr->isStartChosen()) {
+                currentState = std::make_unique<MapViewState>(window);
+            }
+        }
     }
-}
 
-    // TODO: enum class tiles, enum class game modes, assets, game loop, win and lose, tile effects, enemies, combat logic
+    return 0;
+}
