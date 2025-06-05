@@ -3,15 +3,20 @@
 #include <SFML/Graphics.hpp>
 #include <map>
 #include <string>
+#include <memory>
 
-// each texture loads once and is reused
-// You can call:  const sf::Texture& tex = manager.getTexture("grass", "src/Assets/MapTiles/grass.png");
 class TextureManager {
 public:
-    // If this key is already loaded, returns the stored texture.
-    // Otherwise it loads from disk and stores it.
+    TextureManager(const TextureManager&) = delete;
+    TextureManager& operator=(const TextureManager&) = delete;
+
+    static TextureManager& getInstance();
+
     const sf::Texture& getTexture(const std::string& key, const std::string& filename);
+    bool preloadTexture(const std::string& key, const std::string& filename);
+    void clearUnusedTextures();
 
 private:
-    std::map<std::string, sf::Texture> m_textures;
+    TextureManager() = default;
+    std::map<std::string, std::unique_ptr<sf::Texture>> m_textures;
 };

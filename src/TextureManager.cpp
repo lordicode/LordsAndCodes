@@ -1,20 +1,40 @@
 #include "TextureManager.h"
 #include <iostream>
+#include <stdexcept>
 
-const sf::Texture& TextureManager::getTexture(const std::string& key, const std::string& filename)
-{
-    // If we already loaded “key,” return it.
+TextureManager& TextureManager::getInstance() {
+    static TextureManager instance;
+    return instance;
+}
+
+bool TextureManager::preloadTexture(const std::string& key, const std::string& filename) {
+    if (m_textures.find(key) != m_textures.end()) {
+        return true; // Already loaded
+    }
+
+    auto texture = std::make_unique<sf::Texture>();
+    if (!texture->loadFromFile(filename)) {
+        std::cerr << "Failed to load texture: " << filename << "\n";
+        return false;
+    }
+    m_textures[key] = std::move(texture);
+    return true;
+}
+
+const sf::Texture& TextureManager::getTexture(const std::string& key, const std::string& filename) {
     auto it = m_textures.find(key);
     if (it != m_textures.end()) {
-        return it->second;
+        return *it->second;
     }
 
-    // Otherwise, load from disk and insert.
-    sf::Texture tex;
-    if (!tex.loadFromFile(filename)) {
-        std::cerr << "Failed to load texture: " << filename << "\n";
+    if (!preloadTexture(key, filename)) {
+        throw std::runtime_error("Failed to load texture: " + filename);
     }
-    // Move‐insert into the map and return a reference.
-    auto inserted = m_textures.emplace(key, std::move(tex));
-    return inserted.first->second;
+    return *m_textures[key];
+}
+
+void TextureManager::clearUnusedTextures() {
+    // Could implement reference counting here if needed
+    // For now just clears all textures
+    m_textures.clear();
 }
