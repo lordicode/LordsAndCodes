@@ -40,3 +40,16 @@ void Map::fill(int tileID) {
         std::fill(row.begin(), row.end(), tileID);
     }
 }
+
+void Map::setOverlayTile(int x, int y, int tileId) {
+    if (y >= 0 && y < static_cast<int>(m_overlayTiles.size()) &&
+        x >= 0 && x < static_cast<int>(m_overlayTiles[0].size()))
+        m_overlayTiles[y][x] = tileId;
+}
+
+int Map::getOverlayTile(int x, int y) const {
+    if (y >= 0 && y < static_cast<int>(m_overlayTiles.size()) &&
+        x >= 0 && x < static_cast<int>(m_overlayTiles[0].size()))
+        return m_overlayTiles[y][x];
+    return -1;
+}

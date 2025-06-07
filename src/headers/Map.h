@@ -16,10 +16,15 @@ public:
     void resize(int newWidth, int newHeight, int defaultTile = 0);
     void fill(int tileID);
 
+    void setOverlayTile(int x, int y, int tileId);
+    int getOverlayTile(int x, int y) const;
+
 private:
     int m_width;
     int m_height;
     std::vector<std::vector<int>> m_tiles;
+    std::vector<std::vector<int>> m_overlayTiles; // When we need to draw two tiles on top of each other
+
 
     void validateCoordinates(int x, int y) const;
 };
