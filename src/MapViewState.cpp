@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <cstdlib>  
 #include <ctime>    
+#include <sstream>
+#include <string>
+#include <fstream>
 
 MapViewState::MapViewState(sf::RenderWindow& window)
     : State(window),
@@ -11,6 +14,7 @@ MapViewState::MapViewState(sf::RenderWindow& window)
     
     try {
         loadTileTextures();
+        loadEnemies();  
         buildFantasyMap();
         loadTracks();
         m_music.playMusic(m_tracks[m_currentTrack], false);
@@ -32,7 +36,7 @@ void MapViewState::handleEvent(const sf::Event& event) {
             int tileX = pixelX / m_tileSize;
             int tileY = pixelY / m_tileSize;
 
-            // Optional: check bounds
+            // Way to bruteforce where to place tiles
             if (tileX >= 0 && tileX < m_map.getWidth() &&
                 tileY >= 0 && tileY < m_map.getHeight()) 
             {
@@ -88,7 +92,16 @@ void MapViewState::loadTileTextures() {
         "crossroad.png",            // 31
         "Plant1.png",               // 32
         "Plant2.png",               // 33
-        "Plant4.png"                // 34
+        "Plant4.png",               // 34
+        "sand.png",                 // 35
+        "crystal_terrain.png",      // 36
+        "Goblin_archivist_tower.png",// 37
+        "wraith_cemetery.png",      // 38
+        "medieval_workshop.png",    // 39
+        "orc_mess_hall.png",         // 40
+        "purply_crystal_tower.png",  // 41
+        "cave.png",                   // 42
+        "orc_administration.png"         // 43
     };
 
     m_textures.resize(filenames.size());
@@ -97,6 +110,7 @@ void MapViewState::loadTileTextures() {
     for (size_t i = 0; i < filenames.size(); ++i) {
         if (!m_textures[i].loadFromFile(basePath + filenames[i])) {
             throw std::runtime_error("Failed to load tile texture: " + filenames[i]);
+            continue;
         }
     }
 
@@ -105,8 +119,6 @@ void MapViewState::loadTileTextures() {
         unsigned origSize = m_textures[0].getSize().x;
         m_scaleFactor = static_cast<float>(m_tileSize) / static_cast<float>(origSize);
     }
-
-    // Scale houses, they are 120x120, so they need to have a differenet scale, that is TODO
 
     
 }
@@ -286,7 +298,8 @@ void MapViewState::placeEnvironmentTiles()
 
     const std::vector<std::pair<int,int>> rockCoords = {
         {22,2},{22,3},{23,4},{24,5},{28,6},{29,6},{29,5},{29,4},{29,3},
-        {28,2},{27,1},{26,0},{25,0},{24,0},{1,2},{3,2},{3,1},{3,0}
+        {28,2},{27,1},{26,0},{25,0},{24,0},{1,2},{3,2},{3,1},{3,0},{18,9},{18,8},
+        {20,8},{20,9},{18,10},{20,10}
     };
 
     const std::vector<std::pair<int,int>> waterCoords = {
@@ -294,9 +307,27 @@ void MapViewState::placeEnvironmentTiles()
         {10,16},{10,17},{11,17},{11,16},{11,15},
         {1,3},{3,3},{0,17},{0,16},
         {27,0},{29,2},{25,17},{26,17},
-        {14, 6}, {14, 7}, {14, 8}, {14, 9}, {14, 10}
+        {14, 6}, {14, 7}, {14, 8}, {14, 9}, {14, 10},
+        {28,0},{28,1},{29,1},{29,0}
         
     };
+
+    const std::vector<std::pair<int,int>> sand = {
+        {8,13},{9,12},{10,11},{8,10},{7,11},
+        {6,12},{7,10},{6,11},{9,13},{10,13},{10,12}
+        
+    };
+
+    const std::vector<std::pair<int,int>> snow = {
+        {16,0},{17,0},{18,0},{19,0},{19,2},
+        {18,2},{17,2},{20,2},{20,0}
+        
+    };
+
+    const std::vector<std::pair<int,int>> crystal = {
+        {26,5},{28,5},{28,6},{23,0},{22,2}        
+    };
+
     for (auto [x,y] : lavaCoords)
         m_map.setTile(x, y, 11);
 
@@ -305,6 +336,15 @@ void MapViewState::placeEnvironmentTiles()
 
     for (auto [x,y] : waterCoords)
         m_map.setTile(x, y, 28);
+
+    for (auto [x,y] : sand)
+        m_map.setTile(x, y, 35);
+
+    for (auto [x,y] : snow)
+        m_map.setTile(x, y, 25);
+
+    for (auto [x,y] : crystal)
+        m_map.setTile(x, y, 36);
 }
 
 void MapViewState::placeHouses()
@@ -315,7 +355,87 @@ void MapViewState::placeHouses()
     m_houses.push_back({8 , 10,  5});   // house_2  (ID 8)
     m_houses.push_back({9 , 21,  2});   // house_3  (ID 9)
     m_houses.push_back({10, 29, 16});   // house_4  (ID 10)
+
+    m_houses.push_back({37, 3, 2});   // goblin archivist  (ID 37)
+    m_houses.push_back({38, 8, 4});   // cemetery  (ID 38)
+    m_houses.push_back({39, 8, 7});   // workshop (ID 39)
+    m_houses.push_back({40, 1, 12});   // mess hall  (ID 40)
+    m_houses.push_back({41, 28, 4});   // crystal tower  (ID 41)
+    m_houses.push_back({42, 23, 12});   // cave  (ID 42)
+    m_houses.push_back({43, 4, 7});   // orc admin  (ID 43)
+
 }
+
+void MapViewState::loadEnemies()
+{
+    m_enemies.clear();
+
+    // exact tile for every enemy sprite 
+    const std::unordered_map<std::string, sf::Vector2i> fixed = {
+        {"Moon_Wraith.png",          { 8,  3}},
+        {"Gremlin_Archivist.png",     { 2,  2}},
+        {"Sawblade_Sentinel.png",    { 8,  6}},
+        {"Crystal_Seer.png",         {18,  1}},
+        {"Siege_Engine.png",         {28, 15}},
+        {"Mirror_Knight.png",        {15,  8}},
+        {"Pit_of_Portals_Ghost.png", { 17, 13}},
+        {"Goblin_Grenadier.png",     { 19,  9}},
+        {"Bat_Swarm.png",            {23, 12}},
+        {"Sand-Cat_Duelist.png",     {8,  12}},
+        {"Troll_Quartermaster.png",  { 4, 8}},
+        {"Echo_Puzzle_Ghost.png",    { 27,  5}},
+        {"Ogre_Chef.png",            {2,  12}},
+        {"Oracle_Obelisk.png",       {22,  9}},
+        {"Frost_Warden.png",         {30,  4}}
+    };
+
+    std::ifstream in("src/Assets/GameChallenge/challenge.txt");
+    if (!in) return;
+
+    std::string header;
+    std::getline(in, header);          // skip CSV header
+
+    std::string line;
+    while (std::getline(in, line))
+    {
+        if (line.empty()) continue;
+        std::replace(line.begin(), line.end(), '\t', ';');
+
+        std::stringstream ss(line);
+        std::vector<std::string> cols;
+        std::string col;
+        while (std::getline(ss, col, ';')) cols.push_back(col);
+        if (cols.size() < 5) continue;
+
+        auto trim = [](std::string& s){
+            s.erase(0,  s.find_first_not_of(" \r\n"));
+            s.erase(    s.find_last_not_of (" \r\n")+1);
+        };
+        for (auto& c : cols) trim(c);
+
+        Enemy e;
+        try { e.id = std::stoi(cols[0]); }
+        catch (...) { continue; }
+
+        e.name          = cols[1];
+        e.setSpriteFile(cols[2]);
+        e.intro         = cols[3];
+
+        std::stringstream cs(cols[4]);
+        while (std::getline(cs, col, ',')) {
+            trim(col);
+            if (!col.empty())
+                try { e.challenges.push_back(std::stoi(col)); } catch (...) {}
+        }
+
+        auto pos = fixed.find(cols[2]);
+        if (pos == fixed.end()) continue;          // sprite not in list
+        e.tile = pos->second;                      
+
+        m_enemies.push_back(std::move(e));
+    }
+}
+
 
 void MapViewState::buildFantasyMap() {
     const int width = m_map.getWidth();
@@ -353,38 +473,50 @@ void MapViewState::drawHouses()
         drawHouse(h);
 }
 
+void MapViewState::drawEnemies()
+{
+    for (auto& e : m_enemies)
+        if (!e.defeated) e.draw(m_window, m_tileSize);
+}
+
 
 void MapViewState::drawTile(int x, int y, int tileID)
 {
     if (tileID < 0 || tileID >= static_cast<int>(m_textures.size())) return;
 
-    sf::Sprite spr(m_textures[tileID]);
-    sf::Vector2f scale(m_scaleFactor, m_scaleFactor);
+    sf::Sprite   spr(m_textures[tileID]);
+    sf::Vector2f scale(m_scaleFactor, m_scaleFactor);   // default
 
-    if (tileID == 32 || tileID == 33 || tileID == 34)        // trees
+    if (tileID == 32 || tileID == 33 || tileID == 34)          // trees
     {
         sf::Vector2u ts = m_textures[tileID].getSize();
         float base = static_cast<float>(m_tileSize) / ts.x;
         scale = { base * 1.25f, base * 1.25f };
     }
-    else if (tileID == 1)                                    // bushes
+    else if (tileID == 1)                                      // bushes
     {
-        scale *= 0.8f;   // uniform 20 % reduction
+        scale *= 0.8f;
+    }
+    else if (tileID == 20 || tileID == 35 || tileID == 25 || tileID == 28 || tileID >= 36)                    
+    {
+        sf::Vector2u ts = m_textures[tileID].getSize();
+        float base = static_cast<float>(m_tileSize) / ts.x;
+        scale = { base, base };
     }
 
-    spr.setScale(scale);
 
-    sf::Vector2f pos(
+    spr.setScale(scale);
+    spr.setPosition(sf::Vector2f(
         static_cast<float>(x * m_tileSize),
         static_cast<float>(y * m_tileSize)
-    );
-    spr.setPosition(pos);
+    ));
 
-    if (tileID == 32 || tileID == 33 || tileID == 34)        // lift trees
-        spr.move(sf::Vector2f(0.f, -6.f));
+    if (tileID == 32 || tileID == 33 || tileID == 34)
+        spr.move(sf::Vector2f(0.f, -6.f));                     // tree lift
 
     m_window.draw(spr);
 }
+
 
 void MapViewState::drawHouse(const House& h)
 {
@@ -412,6 +544,7 @@ void MapViewState::draw()
     drawVegetation();     
     drawEnvironment();
     drawHouses(); 
+    drawEnemies();
 
     m_window.display();
 }
