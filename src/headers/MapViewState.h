@@ -3,12 +3,15 @@
 #include "State.h"
 #include "Map.h"
 #include "Enemy.h" 
+#include "Player.h"
 #include "MusicManager.h"
 #include "TextureManager.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
 #include <array>
+#include "CombatState.h"
+
 
 class MapViewState : public State {
 public:
@@ -17,6 +20,8 @@ public:
     void handleEvent(const sf::Event& event) override;
     void update(sf::Time dt) override;
     void draw() override;
+    std::unique_ptr<State> m_nextState;
+
 
 private:
     struct House {
@@ -78,9 +83,10 @@ private:
     std::vector<House>              m_houses;
     std::vector<Vegetation>         m_vegetation;
     std::vector<Environment>        m_environment;   
-    std::vector<Enemy>              m_enemies;    
+    std::vector<Enemy>              m_enemies;  
+    Player                          m_player; 
     MusicManager                    m_music;
-    std::array<std::string, 2>      m_tracks{"normal2"};
+    std::array<std::string, 1>      m_tracks{"normal2"};
     size_t                          m_currentTrack = 0;
 
     void loadTileTextures();

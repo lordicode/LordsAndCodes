@@ -32,7 +32,13 @@ void Map::resize(int newWidth, int newHeight, int defaultTile) {
 
     m_width = newWidth;
     m_height = newHeight;
-    m_tiles.resize(m_height, std::vector<int>(m_width, defaultTile));
+
+    // tile grid
+    m_tiles.assign(m_height, std::vector<int >(m_width, defaultTile));
+    // overlay grid
+    m_overlayTiles.assign(m_height, std::vector<int >(m_width, 0));
+    // road mask
+    m_roadMask.assign(m_height, std::vector<char>(m_width, 0));
 }
 
 void Map::fill(int tileID) {
@@ -52,4 +58,17 @@ int Map::getOverlayTile(int x, int y) const {
         x >= 0 && x < static_cast<int>(m_overlayTiles[0].size()))
         return m_overlayTiles[y][x];
     return -1;
+}
+
+void Map::setRoad(int x,int y,bool value)
+{
+    validateCoordinates(x,y);
+    m_roadMask[y][x] = value ? 1 : 0;
+}
+
+bool Map::isRoad(int x,int y) const
+{
+    return (x >= 0 && x < m_width &&
+            y >= 0 && y < m_height &&
+            m_roadMask[y][x]);
 }

@@ -18,6 +18,8 @@ MapViewState::MapViewState(sf::RenderWindow& window)
         buildFantasyMap();
         loadTracks();
         m_music.playMusic(m_tracks[m_currentTrack], false);
+        m_player.setSpriteFile("lord_.png");      // first‐level sprite
+        m_player.initialise({0, 0});
     } catch (const std::exception& e) {
         std::cerr << "Failed to initialize MapViewState: " << e.what() << "\n";
         throw;
@@ -52,7 +54,27 @@ void MapViewState::handleEvent(const sf::Event& event) {
 
 
 void MapViewState::update(sf::Time dt) {
-    (void)dt; 
+    float secs = dt.asSeconds();
+
+    for (auto& e : m_enemies)
+        e.update(secs, m_map);
+
+    m_player.update(secs, m_map, m_enemies);
+
+    // Collision check: did we just land on an undefeated enemy?
+for (auto& e : m_enemies) {
+        if (!e.defeated && e.tile == m_player.getTile()) {
+            // Create a CombatState, handing in the player, this enemy, and music manager
+            m_nextState = std::make_unique<CombatState>(
+                m_window,
+                m_player,
+                e,
+                m_music
+            );
+            return;  
+        }
+    }
+
     cycleTracks();
 }
 
@@ -215,13 +237,12 @@ void MapViewState::buildRoadNetwork() {
             if (x == rx && y == ry) { tileId = 31; break; }
 
         m_map.setTile(x, y, tileId);
+        m_map.setRoad(x, y, true);
     }
 }
 
 void MapViewState::growVegetation()
 {
-    srand(static_cast<unsigned>(time(nullptr)));
-
     const std::vector<std::pair<int,int>> treeCoords = {
         {0,7},{0,8},{0,9},{0,11},{0,12},{0,14},
         {5,10},{5,11},{6,10},
@@ -430,7 +451,9 @@ void MapViewState::loadEnemies()
 
         auto pos = fixed.find(cols[2]);
         if (pos == fixed.end()) continue;          // sprite not in list
-        e.tile = pos->second;                      
+        e.tile = pos->second;   
+        bool isBat = (cols[2] == "Bat_Swarm.png");
+        e.initialise(e.tile, isBat);                
 
         m_enemies.push_back(std::move(e));
     }
@@ -545,6 +568,7 @@ void MapViewState::draw()
     drawEnvironment();
     drawHouses(); 
     drawEnemies();
+    m_player.draw(m_window, m_tileSize);
 
     m_window.display();
 }

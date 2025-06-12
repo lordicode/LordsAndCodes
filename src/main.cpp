@@ -3,9 +3,12 @@
 #include "State.h"
 #include "TitleState.h"
 #include "MapViewState.h"
+#include <cstdlib>
+#include <ctime>
 
 int main()
 {
+    std::srand(std::time(nullptr));
     sf::RenderWindow window(sf::VideoMode({1200, 700}), "Lord & Codes");
     window.setFramerateLimit(144);
 

@@ -12,6 +12,9 @@ public:
     
     int getTile(int x, int y) const;
     void setTile(int x, int y, int tileID);
+
+    void setRoad(int x,int y,bool value = true);
+    bool isRoad(int x,int y) const;
     
     void resize(int newWidth, int newHeight, int defaultTile = 0);
     void fill(int tileID);
@@ -27,4 +30,5 @@ private:
 
 
     void validateCoordinates(int x, int y) const;
+    std::vector<std::vector<char>> m_roadMask;  
 };
