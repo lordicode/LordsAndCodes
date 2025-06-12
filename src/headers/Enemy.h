@@ -28,6 +28,9 @@ public:
                     int                 maxSteps   = 3);
     void update(float dt, const Map& map);
     void draw  (sf::RenderWindow& win, int tileSize) override;
+    const std::string& getSpriteFile() const { return spriteKey; }
+    const std::string& getIntro()      const { return intro;     }
+    int                 getHp()         const { return hp;        }
 
 private:
     std::string spriteKey;

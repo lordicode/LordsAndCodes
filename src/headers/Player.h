@@ -30,8 +30,9 @@ public:
     sf::Vector2i getTile() const { return tile; }
 
     int getLevel() const { return level; }
-    int getHp() const { return hp; }
     int getArmor() const { return armor; }
+    const std::string& getSpriteFile() const { return spriteKey; }
+    int                 getHp()         const { return hp;        }
 
 private:
     std::string spriteKey;

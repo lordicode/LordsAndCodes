@@ -8,9 +8,10 @@
 #include <string>
 #include <fstream>
 
-MapViewState::MapViewState(sf::RenderWindow& window)
-    : State(window),
-      m_map(38, 24, 0) {  
+MapViewState::MapViewState(sf::RenderWindow& window, MusicManager& music)
+  : State(window)
+  , m_music(music)         // store reference
+  , m_map(38,24,0) {  
     
     try {
         loadTileTextures();
@@ -53,25 +54,20 @@ void MapViewState::handleEvent(const sf::Event& event) {
 }
 
 
-void MapViewState::update(sf::Time dt) {
+void MapViewState::update(sf::Time dt)
+{
     float secs = dt.asSeconds();
-
-    for (auto& e : m_enemies)
-        e.update(secs, m_map);
+    for (auto& e : m_enemies) e.update(secs, m_map);
 
     m_player.update(secs, m_map, m_enemies);
 
-    // Collision check: did we just land on an undefeated enemy?
-for (auto& e : m_enemies) {
+    // When collision detected, push CombatState:
+    for (auto& e : m_enemies) {
         if (!e.defeated && e.tile == m_player.getTile()) {
-            // Create a CombatState, handing in the player, this enemy, and music manager
             m_nextState = std::make_unique<CombatState>(
-                m_window,
-                m_player,
-                e,
-                m_music
+                m_window, m_player, e, m_music
             );
-            return;  
+            return;
         }
     }
 

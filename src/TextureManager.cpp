@@ -34,7 +34,5 @@ const sf::Texture& TextureManager::getTexture(const std::string& key, const std:
 }
 
 void TextureManager::clearUnusedTextures() {
-    // Could implement reference counting here if needed
-    // For now just clears all textures
     m_textures.clear();
 }
