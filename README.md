@@ -35,7 +35,7 @@ Background music and sound effects
 
 Clone this repository:
 
-git clone https://github.com/yourname/LordsAndCodes.git
+git clone https://github.com/lordicode/LordsAndCodes.git
 
 Install SFML on your system.
 
