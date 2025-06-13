@@ -1,5 +1,5 @@
 # LordsAndCodes
-A simple, turn-based RPG where you solve coding challenges to win battles.
+A simple, semi-realtime RPG where you solve coding challenges to win battles.
 
 # How to Play
 
