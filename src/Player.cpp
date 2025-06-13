@@ -102,3 +102,9 @@ void Player::gainXp(int amount) {
         spriteKey = "lord" + std::to_string(level) + ".png";
     }
 }
+
+void Player::takeDamage(int dmg)
+{
+    hp = std::max(0, hp - dmg);
+    
+}

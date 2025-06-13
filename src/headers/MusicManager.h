@@ -22,6 +22,7 @@ public:
     void  playSound(const std::string& id, float volumeOverride = -1.f);
     void  setSoundVolume(float volume);
     void  stopAllSounds();
+    const std::string& getCurrentMusicID() const { return m_currentMusicID; }
 
 private:
     std::map<std::string, std::unique_ptr<sf::Music>> m_musicMap;

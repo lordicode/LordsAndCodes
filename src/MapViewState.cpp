@@ -7,12 +7,16 @@
 #include <sstream>
 #include <string>
 #include <fstream>
+#include <thread>
+
 
 MapViewState::MapViewState(sf::RenderWindow& window, MusicManager& music)
   : State(window)
   , m_music(music)         // store reference
   , m_map(38,24,0) {  
-    
+    if (!m_font.openFromFile("src/Assets/Fonts/ByteBounce.ttf")) {
+    throw std::runtime_error("MapViewState: failed to load font");
+    }
     try {
         loadTileTextures();
         loadEnemies();  
@@ -70,6 +74,29 @@ void MapViewState::update(sf::Time dt)
             return;
         }
     }
+
+    if (m_player.getTile() == sf::Vector2i(29, 17)) {
+    sf::Text winText{ m_font, "YOU WON!", 72 };
+    winText.setFillColor(sf::Color::Green);
+
+    auto winSz = m_window.getSize();
+    auto bounds = winText.getLocalBounds();
+    float textW = bounds.size.x;
+    float textH = bounds.size.y;
+
+    winText.setPosition({
+        (winSz.x - textW) * 0.5f,
+        (winSz.y - textH) * 0.5f
+    });
+
+    m_window.clear(sf::Color::Black);
+    m_window.draw(winText);
+    m_window.display();
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    m_window.close();  // or set m_answer = "win" or transition to a menu
+    return;
+}
 
     cycleTracks();
 }
@@ -495,9 +522,34 @@ void MapViewState::drawHouses()
 void MapViewState::drawEnemies()
 {
     for (auto& e : m_enemies)
-        if (!e.defeated) e.draw(m_window, m_tileSize);
-}
+    {
+        // load the enemy texture
+        const auto& tex = TextureManager::getInstance()
+            .getTexture(e.getSpriteFile(),
+                        "src/Assets/Enemy/" + e.getSpriteFile());
 
+        sf::Sprite spr{tex};
+        // scale down to tile size
+        auto sz = tex.getSize();
+        float s = float(m_tileSize) / float(sz.y);
+        spr.setScale({s, s});
+        // position at its map-tile
+        spr.setPosition({
+            float(e.tile.x * m_tileSize),
+            float(e.tile.y * m_tileSize)}
+        );
+
+        if (e.defeated) {
+            // semi-transparent white tint
+            spr.setColor(sf::Color(255, 255, 255, 128));
+            // rotate 90° to the right
+            spr.setRotation(sf::degrees(90.f));
+
+        }
+
+        m_window.draw(spr);
+    }
+}
 
 void MapViewState::drawTile(int x, int y, int tileID)
 {

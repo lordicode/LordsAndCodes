@@ -44,13 +44,14 @@ private:
     std::vector<Vegetation>          m_vegetation;
     std::vector<Environment>         m_environment;
     std::vector<Enemy>               m_enemies;
+    sf::Font m_font;
     Player                           m_player;
 
     MusicManager&                    m_music;       // reference to the one in main()
     std::array<std::string,1>        m_tracks{"normal2"};
     size_t                           m_currentTrack = 0;
 
-    // --- map-building helpers ---
+    // map-building helpers 
     void loadTileTextures();
     void buildFantasyMap();
     void buildRoadNetwork();
@@ -60,7 +61,7 @@ private:
     void loadEnemies();
     void cycleTracks();
 
-    // --- drawing helpers ---
+    // drawing helpers
     void drawTile(int x, int y, int tileID);
     void drawHouse(const House& house);
     void drawVegetation();

@@ -15,8 +15,8 @@ public:
     std::string intro;         
     std::vector<int> challenges;
 
-    int  hp       = 1;
-    int  maxHp    = 1;
+    int  hp = 1;
+    int  maxHp = 1;
     bool defeated = false;
 
     // set which PNG to use
@@ -24,13 +24,15 @@ public:
 
     // lifecycle
     void initialise(const sf::Vector2i& mapPos,
-                    bool                isBatSwarm = false,
-                    int                 maxSteps   = 3);
+                    bool isBatSwarm = false,
+                    int maxSteps = 3);
     void update(float dt, const Map& map);
     void draw  (sf::RenderWindow& win, int tileSize) override;
-    const std::string& getSpriteFile() const { return spriteKey; }
-    const std::string& getIntro()      const { return intro;     }
-    int                 getHp()         const { return hp;        }
+    const std::string& getSpriteFile() const { return spriteKey;}
+    const std::string& getIntro()const { return intro;}
+    int  getHp() const { return hp;}
+    void takeDamage(int dmg);
+
 
 private:
     std::string spriteKey;

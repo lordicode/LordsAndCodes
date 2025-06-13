@@ -106,3 +106,11 @@ void Enemy::draw(sf::RenderWindow& win, int tileSize)
     if(defeated) sp.setColor({255,255,255,120});
     win.draw(sp);
 }
+
+void Enemy::takeDamage(int dmg)
+{
+    hp = std::max(0, hp - dmg);
+    if (hp == 0) {
+        defeated = true;
+    }
+}

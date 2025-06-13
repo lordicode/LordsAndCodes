@@ -10,7 +10,7 @@ TitleState::TitleState(sf::RenderWindow& window, MusicManager& music)
     }
 
     // Create two menu items
-    sf::Text startText   { m_font, "Start Game",  48 };
+    sf::Text startText   { m_font, "Start Game",  58 };
     sf::Text optionsText { m_font, "",     48 };
 
     // Center them on screen

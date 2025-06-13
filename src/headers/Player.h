@@ -21,6 +21,8 @@ public:
     // Update movement, XP/level, and check for combat
     void update(float dt, const Map& map, const std::vector<Enemy>& enemies);
 
+    void takeDamage(int dmg);
+
     // Draw player sprite and combat placeholder text
     void draw(sf::RenderWindow& win, int tileSize) override;
 
@@ -36,7 +38,7 @@ public:
 
 private:
     std::string spriteKey;
-    int hp = 1;
+    int hp = 2;
     int armor = 0;
     int xp = 0;
     int level = 1;
